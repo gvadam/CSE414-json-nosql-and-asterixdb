@@ -1,0 +1,17 @@
+WITH codeList AS (
+  SELECT r AS code
+  FROM geo.world x, x.mondial.sea y, split(y.`-country`, ' ') r
+  GROUP BY r
+  HAVING count(*) > 1 ),
+seaList AS (
+  SELECT c.code AS code, y.name AS name
+  FROM codeList c, geo.world x, x.mondial.sea y, split(y.`-country`, ' ') r
+  WHERE c.code = r),
+list AS (
+  SELECT s.code AS code, (SELECT s2.name FROM seaList s2 WHERE s2.code = s.code) AS seas
+  FROM seaList s
+  GROUP BY s.code)
+SELECT l.code AS country_code, y.name AS country_name, 
+       l.seas AS seas
+FROM list l, geo.world x, x.mondial.country y
+WHERE l.code = y.`-car_code`;

@@ -1,0 +1,15 @@
+WITH mountains as (select m1.name as mountain, code1, code2
+from geoindex.mountain m1, geoindex.mountain m2, split(m1.`-country`, ' ') as code1, split(m2.`-country`, ' ') as code2
+where code1 < code2 and m1.name = m2.name),
+
+seas as (SELECT s1.name as sea, code1, code2
+from geoindex.sea s1, geoindex.sea s2, split(s1.`-country`, ' ') as code1, split(s2.`-country`, ' ') as code2
+where code1 < code2 and s1.name = s2.name),
+
+seasList as (select DISTINCT m.code1, m.code2, (select distinct s2.sea from seas as s2 where s.code1 = s2.code1 and s.code2 = s2.code2) as seas
+from mountains as m, seas as s
+where m.code1 = s.code1 and m.code2 = s.code2)
+
+select DISTINCT m.code1 as first_country, m.code2 as second_country, (select distinct m2.mountain from mountains as m2 where m.code1 = m2.code1 and m.code2 = m2.code2) as mountains,  s3.seas
+from mountains as m, seas as s, seasList as s3
+where m.code1 = s.code1 and m.code2 = s.code2 and s3.code1 = m.code1 and s3.code2 = m.code2;

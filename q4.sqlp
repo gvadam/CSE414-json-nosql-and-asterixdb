@@ -1,0 +1,15 @@
+WITH country AS (
+ SELECT y.population as pop, (SELECT `#text` as name, `-percentage` as percent FROM z) as ethnicities
+ FROM geo.world x, x.mondial.country y
+ LET z = CASE WHEN y.ethnicgroups is missing THEN []
+   WHEN is_array(y.ethnicgroups) 
+   THEN y.ethnicgroups 
+   ELSE [y.ethnicgroups] END ),
+   
+table AS (
+ SELECT d.name as ethnicity, int(c.pop)*0.01*float(d.percent) as total
+ FROM country AS c UNNEST c.ethnicities AS d )
+
+SELECT t.ethnicity AS ethnic_group, COUNT(t.ethnicity) AS num_countries, SUM(t.total) AS total_population
+FROM table AS t
+GROUP BY t.ethnicity;

@@ -1,0 +1,23 @@
+-- Takes 1.051 seconds to complete
+
+WITH mountainList AS (
+SELECT DISTINCT z AS country, (SELECT b.`-id` AS mountain FROM geo.world a, a.mondial.mountain b, split(b.`-country`, ' ') c WHERE c = z) as mountains
+FROM geo.world x, x.mondial.mountain y, split(y.`-country`, ' ') z),
+
+seaList AS (
+SELECT DISTINCT z AS country, (SELECT b.`-id` AS sea FROM geo.world a, a.mondial.sea b, split(b.`-country`, ' ') c WHERE c = z) AS seas
+FROM geo.world x, x.mondial.sea y, split(y.`-country`, ' ') z),
+
+sharedM AS (
+SELECT DISTINCT a.country AS x, c.country AS y
+FROM mountainList a, a.mountains b, mountainList c, c.mountains d
+WHERE a.country < c.country AND b = d),
+
+sharedS AS (
+SELECT DISTINCT a.country AS s, c.country AS t
+FROM seaList a, a.seas b, seaList c, c.seas d
+WHERE a.country < c.country AND b = d)
+
+SELECT m.x as first_country, m.y as second_country
+FROM sharedM m, sharedS s
+WHERE (m.x = s.s AND m.y = s.t) OR (m.y = s.s AND m.x = s.t);

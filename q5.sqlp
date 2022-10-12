@@ -1,0 +1,7 @@
+WITH mountainList AS (   
+ SELECT y.name AS name, y.height AS height, r AS code
+ FROM geo.world x, x.mondial.mountain y, split(y.`-country`, ' ') r )
+SELECT m.name AS mountain, m.height AS height, m.code AS country_code, y.name AS country_name
+FROM mountainList AS m, geo.world x, x.mondial.country y
+WHERE m.code = y.`-car_code`
+ORDER BY int(m.height) DESC;
